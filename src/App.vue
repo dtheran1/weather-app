@@ -1,21 +1,30 @@
 <template>
-  <div id="app">
+  <div 
+    id="app" 
+    :class="typeof weather.main != 'undefined' && weather.main.temp > 16 ? 'warm' : ''"
+  >
     <main>
       <div class="search-box">
-        <input type="text" class="search-bar" placeholder="Search...">
+        <input 
+          type="text" 
+          class="search-bar" 
+          placeholder="Search..."
+          v-model="query"
+          @keypress="fetchWeather"
+        />
       </div>
 
-      <div class="weather-wrap">
+      <div class="weather-wrap" v-if="typeof weather.main != 'undefined'">
         <div class="location-box">
           <div class="location">
-            Northampton, UK
+            {{weather.name}}, {{weather.sys.country}}
           </div>
-          <div class="date">Monday 20 Januray 2022</div>
+          <div class="date">{{ dateBuilder() }}</div>
         </div>
 
         <div class="weather-box">
-          <div class="temp">9°c</div>
-          <div class="weather">Rain</div>
+          <div class="temp"> {{ Math.round(weather.main.temp) }}°c</div>
+          <div class="weather">{{weather.weather[0].main}}</div>
         </div>
       </div>
     </main>
@@ -23,21 +32,44 @@
 </template>
 
 <script>
-import {ref} from 'vue'
+import { ref } from 'vue'
 
 export default {
   name: 'App',
-  components: {
-  },
-  // data(){
-  //   return {
-  //     api_key: 'e0922881b9fe7e345ea47d631ad5ee61'
-  //   }
-  // },
   setup() {
-    const api_key = ref('e0922881b9fe7e345ea47d631ad5ee61')
+    const api_key = 'e0922881b9fe7e345ea47d631ad5ee61'
+    const url_base = 'https://api.openweathermap.org/data/2.5/'
+    const query = ref('')
+    const weather = ref({})
 
-    return{api_key}
+    const fetchWeather = (e) => {
+      if (e.key == 'Enter') {
+        fetch(`${url_base}weather?q=${query.value}&units=metric&APPID=${api_key}`)
+          .then(res => {
+            return res.json();
+          })
+          .then(setResult);
+      }
+    }
+
+    const setResult = (results) => weather.value = results
+
+    const dateBuilder = () => {
+      let d = new Date();
+      let months = ['Januray', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+      let days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+
+
+      let day = days[d.getDay()];
+      let date = d.getDate();
+      let month = months[d.getMonth()];
+      let year = d.getFullYear();
+
+      return `${day} ${date} ${month} ${year}`
+    }
+
+
+    return{api_key, url_base,query, weather, fetchWeather, dateBuilder }
   }
 }
 </script>
@@ -58,6 +90,10 @@ body{
   background-size: cover;
   background-position: bottom;
   transition: 0.4s;
+}
+
+#app.warm {
+  background-image: url('./assets/warm-bg.jpg');
 }
 
 main{
@@ -138,6 +174,5 @@ main{
   font-weight: 700;
   font-style: italic;
   text-shadow: 3px 6px rgba(0, 0, 0, 0.25);
-
 }
 </style>
