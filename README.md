@@ -1,5 +1,8 @@
 # vue-weather
 
+![image](https://user-images.githubusercontent.com/83596975/179860613-aeec7b65-e727-43a4-b1ec-59a83751588a.png)
+
+
 ## Project setup
 ```
 npm install
